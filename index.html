@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>A Tiny Love Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+<style>
+/* VOICE: sweet, playful, a little goofy — a love note disguised as a retro game
+   IDEA: a pink handheld console that boots a one-level "love quest"
+   PICTURE: pixel sprites (two little players, hearts, clouds) on a candy-sky screen
+   COLOUR and TYPE: bubblegum body, plum ink, hot-pink accent; Press Start 2P throughout
+   LAYOUT: one centered console; screen on top, D-pad + A/B below, stacks naturally on phones */
+:root{color-scheme:light dark;--bg:light-dark(#ffd6e4,#2a1433);--ink:light-dark(#3b1a3a,#ffe3ee);
+--body:#ff8fb6;--bodyd:#e2678f;--plum:#3b1a3a;--accent:#ff3d7f;--sky1:#ffc8dd;--sky2:#cfe6ff;--cream:#fff4f8}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;min-height:100svh;display:grid;place-items:center;gap:14px;padding:24px 14px;background:var(--bg);color:var(--ink);
+font:13px/1.6 "Press Start 2P",ui-monospace,monospace;overflow-x:clip;background-size:56px 56px;image-rendering:pixelated;-webkit-tap-highlight-color:transparent}
+.console{width:min(430px,100%);background:var(--body);border-radius:26px 26px 70px 26px;padding:20px 20px 26px;
+box-shadow:inset -7px -7px 0 var(--bodyd),inset 5px 5px 0 #ffb8d0,0 12px 0 #0000001f}
+.bezel{background:var(--plum);border-radius:12px 12px 34px 12px;padding:14px 14px 8px}
+.screen{position:relative;aspect-ratio:1/1;overflow:hidden;background:linear-gradient(var(--sky1),var(--sky2) 60%);
+border-radius:4px;cursor:pointer;user-select:none;color:var(--plum)}
+.brand{color:#ffb8d0;font-size:13px;text-align:center;margin:8px 0 2px;letter-spacing:1px}
+.px{image-rendering:pixelated;position:absolute;display:block}
+.ground{position:absolute;left:0;right:0;bottom:0;height:38%;
+background:repeating-conic-gradient(#ff9fc2 0 25%,#ffb3cf 0 50%) 0 0/16px 16px;border-top:4px solid var(--plum)}
+.cloud{width:96px;top:10%;animation:drift 22s linear infinite}
+.cloud.c2{width:64px;top:26%;animation-duration:30s;animation-delay:-12s;opacity:.85}
+@keyframes drift{from{left:-110px}to{left:110%}}
+.layer{position:absolute;inset:0;display:none}
+.layer.on{display:block}
+.center{position:absolute;left:0;right:0;text-align:center;padding:0 10px}
+.big{font-size:20px;line-height:1.3}
+.blink{animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.bob{animation:bob .8s steps(2) infinite}
+@keyframes bob{50%{transform:translateY(-4px)}}
+.player{width:56px;bottom:38%;transition:left 1.8s steps(14)}
+#p1{left:14%}#p2{left:calc(86% - 56px)}
+.together #p1{left:calc(50% - 58px)}.together #p2{left:calc(50% + 2px)}
+.box{position:absolute;left:8px;right:8px;bottom:8px;height:calc(38% - 18px);background:var(--cream);border:4px solid var(--plum);
+box-shadow:inset -4px -4px 0 #ffd3e2;padding:10px 12px;font-size:13px;line-height:1.7;overflow:hidden}
+.box .more{position:absolute;right:10px;bottom:6px;color:var(--accent)}
+.panel{position:absolute;left:8%;right:8%;top:16%;background:var(--cream);border:4px solid var(--plum);padding:14px;text-align:center}
+.track{height:26px;border:4px solid var(--plum);background:#fff;margin:12px 0 10px;padding:2px}
+.fill{height:100%;width:0;background:repeating-linear-gradient(90deg,var(--accent) 0 12px,transparent 12px 15px)}
+.over .track{animation:shake .12s steps(2) infinite}
+.over .fill{background:repeating-linear-gradient(90deg,#ff3d7f 0 12px,#ffb000 12px 15px)}
+@keyframes shake{50%{transform:translate(3px,-2px)}}
+#pct{font-size:22px}
+#fTitle{white-space:pre-line}
+#err{color:var(--accent);min-height:3.4em;margin-top:6px}
+.bigheart{width:35px;left:calc(50% - 17px);bottom:calc(38% + 76px);transform:scale(0);transition:transform .5s steps(5)}
+.together .bigheart{transform:scale(1)}
+.mini{width:21px;pointer-events:none;animation:float 1.4s ease-out forwards}
+@keyframes float{to{transform:translate(var(--dx),-110px) scale(.6);opacity:0}}
+.controls{display:flex;justify-content:space-between;align-items:center;margin:22px 6px 6px}
+.dpad{position:relative;width:84px;height:84px}
+.dpad i{position:absolute;background:var(--plum);border-radius:4px}
+.dpad i:first-child{left:28px;top:0;width:28px;height:84px}.dpad i:last-child{top:28px;left:0;width:84px;height:28px}
+.ab{display:flex;gap:16px;transform:rotate(-22deg)}
+.btn{width:54px;height:54px;border-radius:50%;border:0;background:var(--accent);color:#fff;font:inherit;font-size:14px;cursor:pointer;
+box-shadow:inset -4px -4px 0 #c4245a,0 4px 0 #0003}
+.btn:active{transform:translateY(3px);box-shadow:inset -4px -4px 0 #c4245a}
+.btn:focus-visible,.pill:focus-visible{outline:3px solid var(--plum);outline-offset:3px}
+.pills{display:flex;justify-content:center;gap:18px;margin-top:14px}
+.pill{border:0;background:#c95a80;color:#ffe3ee;font:inherit;font-size:13px;padding:8px 12px;border-radius:20px;min-height:44px;cursor:pointer}
+.hint{font-size:13px;text-align:center;opacity:.8;max-width:430px}
+@media(max-width:380px){.big{font-size:16px}.box{font-size:13px;padding:8px}.btn{width:48px;height:48px}}
+@media(prefers-reduced-motion:reduce){.bob,.cloud,.blink,.over .track{animation:none}.player,.bigheart{transition:none}}
+</style>
+</head>
+<body>
+<div class="console">
+  <div class="bezel">
+    <div class="screen" id="screen" role="button" tabindex="0" aria-label="Game screen, tap to continue">
+      <img class="px cloud" alt=""><img class="px cloud c2" alt="">
+      <div class="ground"></div>
+
+      <div class="layer on" id="title">
+        <img class="px bob heart" style="width:84px;left:calc(50% - 42px);top:12%" alt="">
+        <div class="center big" style="top:40%" id="tName"></div>
+        <div class="center" style="top:52%">a tiny love quest</div>
+        <div class="center blink" style="bottom:16%">PRESS START</div>
+      </div>
+
+      <div id="stage" class="layer">
+        <img class="px player bob" id="p1" alt="Player 1">
+        <img class="px player bob" id="p2" alt="Player 2" style="animation-delay:.4s">
+        <img class="px bigheart heart" alt="">
+      </div>
+
+      <div class="layer" id="dialog">
+        <div class="box"><span id="typed"></span><span class="more blink" id="more">&#9660;</span></div>
+      </div>
+
+      <div class="layer" id="meter">
+        <div class="panel" id="panel">
+          <div>SCANNING HEART...</div>
+          <div class="track"><div class="fill" id="fill"></div></div>
+          <div id="pct">0%</div>
+          <div id="err"></div>
+        </div>
+      </div>
+
+      <div class="layer" id="final">
+        <div class="center big" style="top:5%" id="fTitle"></div>
+        <div class="box" style="height:auto;min-height:calc(38% - 18px);text-align:center;line-height:1.4;padding:6px 8px"><span id="fSub"></span><br><span id="hugs" style="color:#ff3d7f"></span></div>
+      </div>
+    </div>
+    <div class="brand">HEART-O-MATIC</div>
+  </div>
+  <div class="controls">
+    <div class="dpad" aria-hidden="true"><i></i><i></i></div>
+    <div class="ab"><button class="btn" id="bB" aria-label="B: go back">B</button><button class="btn" id="bA" aria-label="A: continue">A</button></div>
+  </div>
+  <div class="pills"><button class="pill" id="snd">SOUND: ON</button><button class="pill" id="restart">RESTART</button></div>
+</div>
+<p class="hint">Tap the screen or press A</p>
+
+<script>
+{
+/* ===== Edit these to make it yours ===== */
+const NAME = "Irene";
+const LINES = [
+  "Hi " + NAME + "!",
+  "It's break, and we're miles apart...",
+  "...so I built you a tiny game.",
+  "Your quest: find out how much I love you."
+];
+const FINAL_TITLE = "I LOVE YOU,\n" + NAME.toUpperCase();
+const FINAL_SUB = "Player 1 misses Player 2. See you soon.";
+/* ======================================= */
+
+const $ = id => document.getElementById(id);
+const sprite = (grid, pal) => {
+  const c = document.createElement('canvas'); c.width = grid[0].length; c.height = grid.length;
+  const x = c.getContext('2d');
+  grid.forEach((r, j) => [...r].forEach((ch, i) => { if (pal[ch]) { x.fillStyle = pal[ch]; x.fillRect(i, j, 1, 1); } }));
+  return c.toDataURL();
+};
+const HEART = [".11.11.","1221111","1211111","1111113",".11113.","..113..","...3..."];
+const heartSrc = sprite(HEART, {1:'#ff3d7f',2:'#ffffff',3:'#c4245a'});
+const BOY = ["..kkkk..",".khhhhk.","khhhhhhk","khsssshk","ksesseks","ksrssrsk",".kssssk.",".kcccck.","kcccccck",".kp..pk."];
+const GIRL = ["..kkkkbb",".khhhhkb","khhhhhhk","khsssshk","hsessesh","hsrssrsh","hksssskh","hkcccckh","kcccccck",".kp..pk."];
+const CLOUD = ["....wwww........","..wwwwwwww..ww..",".wwwwwwwwwwwwww.","wwwwwwwwwwwwwwww",".wwwwwwwwwwwwww."];
+const ink = '#3b1a3a';
+$('p1').src = sprite(BOY, {k:ink,h:'#4a2c2a',s:'#ffd9c2',e:ink,r:'#ff9db8',c:'#6fa8ff',p:ink});
+$('p2').src = sprite(GIRL, {k:ink,h:'#2b1b2e',s:'#ffe0cc',e:ink,r:'#ff8fb1',c:'#ff6f9f',b:'#ff3d7f',p:ink});
+document.querySelectorAll('.heart').forEach(i => i.src = heartSrc);
+const cloudSrc = sprite(CLOUD, {w:'#ffffff'});
+document.querySelectorAll('.cloud').forEach(i => i.src = cloudSrc);
+document.body.style.backgroundImage = `url(${sprite(["..........","..........", "...11.11..","...111111.","....1111..",".....11...","..........","........."+"."], {1:'#ff8fb633'})})`;
+$('tName').textContent = "FOR " + NAME.toUpperCase();
+$('fTitle').textContent = FINAL_TITLE;
+$('fSub').textContent = FINAL_SUB;
+
+/* sound */
+let ac = null, soundOn = true;
+const beep = (f, d = .08, when = 0) => {
+  if (!soundOn) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + when;
+    o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(.04, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d);
+  } catch (e) {}
+};
+const tune = () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => beep(f, .16, i * .13));
+
+/* state */
+let scene = 'title', line = 0, typing = null, shown = '', meterTimer = null, meterDone = false, hugs = 0;
+try { hugs = +localStorage.getItem('hugs') || 0; } catch (e) {}
+const show = (...ids) => { ['title','stage','dialog','meter','final'].forEach(id => $(id).classList.toggle('on', ids.includes(id))); };
+const setHugs = () => { $('hugs').textContent = hugs ? `hugs sent: ${hugs}` : 'press A to send a hug'; };
+
+const typeLine = () => {
+  const full = LINES[line]; shown = ''; $('more').style.visibility = 'hidden'; clearInterval(typing);
+  typing = setInterval(() => {
+    shown = full.slice(0, shown.length + 1); $('typed').textContent = shown;
+    if (shown === full) { clearInterval(typing); typing = null; $('more').style.visibility = 'visible'; }
+  }, 38);
+};
+
+const startMeter = () => {
+  scene = 'meter'; show('stage', 'meter'); meterDone = false;
+  let p = 0; $('panel').classList.remove('over'); $('err').textContent = '';
+  clearInterval(meterTimer);
+  meterTimer = setInterval(() => {
+    p += p < 100 ? 2 : 23;
+    if (p >= 100 && p < 120) { $('err').textContent = '100%... wait'; }
+    if (p > 100) $('panel').classList.add('over');
+    if (p >= 999) { p = 999; clearInterval(meterTimer); $('err').textContent = 'ERROR: TOO MUCH LOVE'; meterDone = true; beep(220, .3); }
+    $('fill').style.width = Math.min(p, 100) + '%'; $('pct').textContent = p + '%';
+    if (p % 10 === 0 && p <= 100) beep(400 + p * 4, .03);
+  }, 45);
+};
+
+const burst = (n = 8, x, y) => {
+  const s = $('screen'), r = s.getBoundingClientRect();
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement('img'); h.src = heartSrc; h.className = 'px mini'; h.alt = '';
+    h.style.left = ((x ?? r.width / 2) - 10 + (Math.random() * 40 - 20)) + 'px';
+    h.style.top = ((y ?? r.height * .45) - 10) + 'px';
+    h.style.setProperty('--dx', (Math.random() * 120 - 60) + 'px');
+    h.style.animationDelay = (i * 0.05) + 's';
+    s.appendChild(h); setTimeout(() => h.remove(), 1700);
+  }
+};
+
+const goFinal = () => {
+  scene = 'final'; show('stage', 'final'); $('stage').classList.remove('together');
+  setHugs();
+  requestAnimationFrame(() => requestAnimationFrame(() => $('stage').classList.add('together')));
+  setTimeout(() => { tune(); burst(12); }, 1800);
+};
+
+const A = (x, y) => {
+  if (scene === 'title') { beep(660); scene = 'dialog'; line = 0; $('stage').classList.remove('together'); show('stage', 'dialog'); typeLine(); }
+  else if (scene === 'dialog') {
+    if (typing) { clearInterval(typing); typing = null; $('typed').textContent = LINES[line]; $('more').style.visibility = 'visible'; return; }
+    beep(520); line++;
+    if (line < LINES.length) typeLine(); else startMeter();
+  }
+  else if (scene === 'meter') { if (meterDone) { beep(660); goFinal(); } }
+  else if (scene === 'final') {
+    hugs++; try { localStorage.setItem('hugs', hugs); } catch (e) {}
+    setHugs(); beep(880, .06); beep(1175, .08, .06); burst(8, x, y);
+  }
+};
+const B = () => {
+  beep(300);
+  if (scene === 'dialog' && line > 0 && !typing) { line--; typeLine(); }
+  else if (scene === 'final') restart();
+};
+const restart = () => {
+  clearInterval(typing); clearInterval(meterTimer); typing = null;
+  scene = 'title'; $('stage').classList.remove('together'); show('title');
+};
+
+$('screen').addEventListener('click', e => { const r = e.currentTarget.getBoundingClientRect(); A(e.clientX - r.left, e.clientY - r.top); });
+$('screen').addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); A(); } });
+$('bA').addEventListener('click', () => A());
+$('bB').addEventListener('click', B);
+$('restart').addEventListener('click', () => { beep(300); restart(); });
+$('snd').addEventListener('click', () => { soundOn = !soundOn; $('snd').textContent = 'SOUND: ' + (soundOn ? 'ON' : 'OFF'); beep(660); });
+document.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('button,#screen')) return;
+  if (e.key === 'Enter' || e.key === ' ' || e.key.toLowerCase() === 'a') { e.preventDefault(); A(); }
+  if (e.key.toLowerCase() === 'b' || e.key === 'Escape') B();
+});
+}
+</script>
+</body>
+</html>
